@@ -1,3 +1,5 @@
+# basic API with a single route
+
 from fastapi import FastAPI
 
 app = FastAPI()
