@@ -1,0 +1,39 @@
+
+@mixin theme($bgColor: White, $fgColor: Black, $font: ('Courier New', Courier, monospace)) {
+    background-color: $bgColor;
+    color: $fgColor;
+    font: $font;
+}
+
+@mixin circle($diameter) {
+    width: $diameter;
+    height: $diameter;
+    border-radius: 100%;
+}
+
+.centered {
+    align-items: center;
+    align-content: center;
+    text-align: center;
+    width: 50%;
+    margin: auto;
+}
+
+.theme-icon {
+    &:hover {
+        cursor: pointer;
+    }
+
+    .theme-icon-back {
+        display: block;
+        width: 75px;
+        height: 25px;
+        border-radius: 10px;
+        transition: 0.5s;
+    }
+}
+
+.theme-circle {
+    @include circle(25px);
+    transition: 0.5s ease-in-out;
+}

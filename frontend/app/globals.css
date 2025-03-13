@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 142 95% 17%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 60 15% 47%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 225 55% 47%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 79% 36%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 142 95% 17%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 142 95% 17%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 60 15% 47%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 225 55% 47%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 79% 36%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 142 95% 17%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Add monospace font for dates */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.raider-nav {
+  @apply flex items-center justify-between bg-raider-green text-white px-4 py-1 text-xs;
+}
+
+.raider-nav-left {
+  @apply flex items-center gap-2;
+}
+
+.raider-nav-right {
+  @apply flex items-center gap-2;
+}
+
+.raider-button-green {
+  @apply bg-raider-green text-white px-3 py-1 text-xs rounded-sm hover:bg-opacity-90;
+}
+
+.raider-button-red {
+  @apply bg-raider-red text-white px-3 py-1 text-xs rounded-sm hover:bg-opacity-90;
+}
+
+.raider-button-blue {
+  @apply bg-raider-blue text-white px-3 py-1 text-xs rounded-sm hover:bg-opacity-90;
+}
+
+.bell-schedule-item {
+  @apply text-xs py-0.5;
+}
+

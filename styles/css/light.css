@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-body {
-  background-color: #05391a;
-  font-family: "Courier New", Courier, monospace;
-  color: #dddddd;
-=======
 .centered {
   align-items: center;
   align-content: center;
@@ -30,15 +24,14 @@ body {
   transition: 0.5s ease-in-out;
 }
 
-.dark {
-  background-color: #05391a;
-  color: #dddddd;
+.light {
+  background-color: #11ad4f;
+  color: #000000;
   font: "Courier New", Courier, monospace;
 }
-.dark .theme-icon-back {
-  background-color: purple;
+.light .theme-icon-back {
+  background-color: skyblue;
 }
-.dark .theme-circle {
-  background-color: White;
->>>>>>> 15689cc78735cb630d935c80d63313bfbc54b0f3
+.light .theme-circle {
+  background-color: yellow;
 }

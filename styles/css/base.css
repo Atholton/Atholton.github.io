@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-body {
-  background-color: #05391a;
-  font-family: "Courier New", Courier, monospace;
-  color: #dddddd;
-=======
 .centered {
   align-items: center;
   align-content: center;
@@ -28,17 +22,4 @@ body {
   height: 25px;
   border-radius: 100%;
   transition: 0.5s ease-in-out;
-}
-
-.dark {
-  background-color: #05391a;
-  color: #dddddd;
-  font: "Courier New", Courier, monospace;
-}
-.dark .theme-icon-back {
-  background-color: purple;
-}
-.dark .theme-circle {
-  background-color: White;
->>>>>>> 15689cc78735cb630d935c80d63313bfbc54b0f3
 }

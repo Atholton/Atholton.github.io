@@ -2,9 +2,24 @@ $primary-color: #05391a;
 $text-color: #dddddd;
 $font: 'Courier New', Courier, monospace;
 
+<<<<<<< HEAD
 body {
     background-color: $primary-color;
     font-family: $font;
     color: $text-color;
+=======
+@use 'base';
+
+.dark {
+    @include base.theme($primary-color, $text-color, $font);
+
+    .theme-icon-back {
+        background-color: purple;
+    }
+
+    .theme-circle {
+        background-color: White;
+    }
+>>>>>>> 15689cc78735cb630d935c80d63313bfbc54b0f3
 }
 
