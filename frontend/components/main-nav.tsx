@@ -1,13 +1,17 @@
 import Link from "next/link"
 import { Home, Sun } from "lucide-react"
 
-export function MainNav() {
+interface MainNavProps {
+  userType?: "student" | "teacher"
+}
+
+export function MainNav({ userType = "student" }: MainNavProps) {
   return (
     <nav className="bg-gradient-to-r from-raider-green to-raider-lightgreen text-white py-4 px-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-8">
-          <Link href="/student" className="text-2xl font-bold">
-            STUDENTS
+          <Link href={`/${userType}`} className="text-2xl font-bold">
+            {userType === "teacher" ? "TEACHERS" : "STUDENTS"}
           </Link>
           <div className="flex items-center space-x-6">
             <Link href="/login/student" className="hover:opacity-80">
