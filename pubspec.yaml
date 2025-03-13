@@ -1,5 +1,0 @@
-name: ahs_signup
-environment:
-  sdk: ^3.6.0
-dev_dependencies:
-  sass: ^1.83.4
