@@ -9,3 +9,5 @@ Then to run with localhost
 
 3. npm run dev
     ctrl + click on the localhost link to see the website preview
+
+npm audit regularly to check for vulnerabilities in the dependencies
