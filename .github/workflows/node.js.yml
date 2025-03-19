@@ -29,6 +29,10 @@ jobs:
 
     - name: Run the tests
       run: npm test
+
+
+
+      
       
       # dd balls
     - name: Run the tests and generate coverage report
@@ -47,6 +51,16 @@ jobs:
         github_token: ${{ secrets.CODECOV_TOKEN }}
         repository: ${{ github.repository }}
       # added
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+      #added
+      
+
+
+
 
     - name: Build
       run: npm run build
