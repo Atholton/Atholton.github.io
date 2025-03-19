@@ -32,7 +32,7 @@ jobs:
 
       # Upload the production build artifact from one matrix job (using 18.x here)
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Updated version to v4
         with:
           name: build
           path: build/
