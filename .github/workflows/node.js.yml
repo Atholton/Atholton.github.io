@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'  # Caches npm dependencies
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci  # This command uses package-lock.json if present
 
       - name: Run tests
         run: npm test
