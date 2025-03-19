@@ -31,12 +31,11 @@ jobs:
         run: npm run build
 
       # Upload the production build artifact from one matrix job (using 18.x here)
-      - name: Upload build artifact
-        if: matrix.node-version == '18.x'
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifact
-          path: build
+          name: build
+          path: build/
 
   deploy:
     needs: build
