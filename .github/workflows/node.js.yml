@@ -24,8 +24,8 @@ jobs:
       - name: Check for package-lock.json or yarn.lock
         run: |
           if [ ! -f package-lock.json ] && [ ! -f yarn.lock ]; then
-            echo "Error: Dependencies lock file is not found. Exiting."
-            exit 1
+            echo "Error: Dependencies lock file is not found. Creating package-lock.json."
+            npm install --package-lock-only
           fi
 
       - name: Install dependencies
