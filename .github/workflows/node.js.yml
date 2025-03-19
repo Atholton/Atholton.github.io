@@ -25,7 +25,7 @@ jobs:
         run: |
           if [ ! -f package-lock.json ] && [ ! -f yarn.lock ]; then
             echo "Error: Dependencies lock file is not found. Exiting."
-          exit 1
+            exit 1
           fi
 
       - name: Install dependencies
@@ -37,11 +37,12 @@ jobs:
       - name: Build the React app
         run: npm run build
 
-      # Upload the production build artifact from one matrix job (using 18.x here)
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4  # Updated version to v4
+      # Upload the production build artifact only from Node 18.x
+      - name: Upload build artifact
+        if: matrix.node-version == '18.x'
+        uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: build-artifact
           path: build/
 
   deploy:
