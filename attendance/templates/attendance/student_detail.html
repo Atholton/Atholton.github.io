@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="student-detail">
+    <h1>{{ student.name }}</h1>
+    
+    <div class="student-info">
+        <h2>Student Information</h2>
+        <p><strong>Grade:</strong> {{ student.grade }}</p>
+        <p><strong>Email:</strong> {{ student.hcpss_email }}</p>
+        {% if student.account_email %}
+        <p><strong>Personal Email:</strong> {{ student.account_email }}</p>
+        {% endif %}
+        {% if student.phone_num %}
+        <p><strong>Phone:</strong> {{ student.phone_num }}</p>
+        {% endif %}
+        <p><strong>Teacher:</strong> {{ student.teacher.get_full_name }}</p>
+        {% if student.teacher_period2 %}
+        <p><strong>Period 2 Teacher:</strong> {{ student.teacher_period2.get_full_name }}</p>
+        {% endif %}
+        {% if student.temp_teacher %}
+        <p><strong>Temporary Teacher:</strong> {{ student.temp_teacher }}</p>
+        {% endif %}
+    </div>
+
+    <div class="teacher-announcements">
+        <h2>Teacher Announcements</h2>
+        {% for announcement in announcements %}
+        <div class="announcement">
+            <h3>{{ announcement.title }}</h3>
+            <p class="timestamp">{{ announcement.timestamp|date:"F j, Y, P" }}</p>
+            <div class="body">{{ announcement.body }}</div>
+        </div>
+        {% empty %}
+        <p>No announcements from your teacher.</p>
+        {% endfor %}
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'attendance:student_list' %}" class="button">Back to Student List</a>
+    </div>
+</div>
+{% endblock %}

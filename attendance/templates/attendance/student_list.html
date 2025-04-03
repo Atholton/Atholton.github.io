@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Students</h1>
+
+<form method="get" class="mb-4">
+    <input type="text" name="search" value="{{ search }}" placeholder="Search students...">
+    <select name="grade">
+        <option value="">All Grades</option>
+        {% for g in grades %}
+        <option value="{{ g }}" {% if g|stringformat:"i" == grade %}selected{% endif %}>Grade {{ g }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filter</button>
+</form>
+
+<div class="student-list">
+    {% for student in students %}
+    <div class="student-card">
+        <h3>{{ student.name }}</h3>
+        <p>Grade: {{ student.grade }}</p>
+        <p>Teacher: {{ student.teacher.get_full_name }}</p>
+        <a href="{% url 'attendance:student_detail' student.id %}">View Details</a>
+    </div>
+    {% empty %}
+    <p>No students found.</p>
+    {% endfor %}
+</div>
+
+{% if students.has_other_pages %}
+<div class="pagination">
+    {% if students.has_previous %}
+    <a href="?page={{ students.previous_page_number }}&search={{ search }}&grade={{ grade }}">&laquo; Previous</a>
+    {% endif %}
+    
+    <span>Page {{ students.number }} of {{ students.paginator.num_pages }}</span>
+    
+    {% if students.has_next %}
+    <a href="?page={{ students.next_page_number }}&search={{ search }}&grade={{ grade }}">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

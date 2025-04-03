@@ -1,0 +1,23 @@
+# Django and REST framework
+Django>=5.1.7
+djangorestframework==3.14.0
+django-cors-headers>=4.3.1
+
+# Database
+psycopg2>=2.9.10  # PostgreSQL adapter
+psycopg2-binary>=2.9.9  # For systems without PostgreSQL development headers
+
+# Security and Environment
+python-dotenv>=1.0.1
+django-environ>=0.11.2
+bcrypt>=4.1.2
+
+# Production
+gunicorn>=21.2.0  # For production deployment
+
+# Development Tools
+black>=24.2.0  # Code formatting
+flake8>=7.0.0  # Code linting
+pytest>=8.0.0  # Testing
+pytest-django>=4.8.0  # Django test integration
+requests>=2.31.0  # HTTP client
