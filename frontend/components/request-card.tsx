@@ -62,4 +62,3 @@ export function RequestCard({ student, room, date, status }: RequestCardProps) {
     </div>
   )
 }
-

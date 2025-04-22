@@ -28,4 +28,3 @@ export function BellSchedule({ className = "" }: BellScheduleProps) {
     </div>
   )
 }
-

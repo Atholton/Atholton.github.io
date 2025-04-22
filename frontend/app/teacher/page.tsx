@@ -4,6 +4,7 @@ import { MainNav } from "@/components/main-nav"
 import { RequestCard } from "@/components/request-card"
 import { BellSchedule } from "@/components/bell-schedule"
 import { Button } from "@/components/ui/button"
+import { OpenRoomDialog } from "@/components/open-room-dialog"
 import Link from "next/link"
 
 export default function TeacherDashboard() {
@@ -29,9 +30,7 @@ export default function TeacherDashboard() {
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl dark:text-white">MY REQUESTS</h2>
-            <Button className="bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white px-6 py-2 h-auto rounded-lg transition-colors">
-              Open Room?
-            </Button>
+            <OpenRoomDialog />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -69,4 +68,3 @@ export default function TeacherDashboard() {
     </div>
   )
 }
-
