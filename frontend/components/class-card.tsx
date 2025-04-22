@@ -62,4 +62,3 @@ export function ClassCard({ teacher, room, date, status }: ClassCardProps) {
     </div>
   )
 }
-
