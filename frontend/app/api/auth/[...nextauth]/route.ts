@@ -1,25 +1,67 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.CLIENT_ID!,
-      clientSecret: process.env.CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   callbacks: {
     async signIn({ account, profile }) {
       if (account?.provider === "google") {
-        // Verify hcpss.org domain
-        return profile?.email?.endsWith("@inst.hcpss.org") ?? false;
+        // First verify hcpss.org domain
+        if (!profile?.email?.endsWith("@inst.hcpss.org")) {
+          return false;
+        }
+
+        try {
+          // Verify user exists in our backend
+          const response = await fetch(`${BACKEND_URL}/api/accounts/verify/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: profile.email }),
+          });
+
+          if (!response.ok) {
+            return false;
+          }
+
+          const data = await response.json();
+          return data.status === 'success';
+        } catch (error) {
+          console.error('Backend verification failed:', error);
+          return false;
+        }
       }
-      return false; // Deny sign in if not Google or not hcpss.org
+      return false;
     },
-    async jwt({ token, account }) {
-      // Add custom claims to token
-      if (account) {
-        token.userRole = "pending"; // Will be updated after DB verification
+    async jwt({ token, account, profile }) {
+      // Verify user role on first sign in
+      if (account && profile?.email) {
+        try {
+          const response = await fetch(`${BACKEND_URL}/api/accounts/verify/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: profile.email }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            token.userRole = data.role;
+            token.name = data.name;
+          }
+        } catch (error) {
+          console.error('Failed to fetch user role:', error);
+          token.userRole = 'error';
+        }
       }
       return token;
     },

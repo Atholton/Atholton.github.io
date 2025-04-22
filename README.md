@@ -59,6 +59,45 @@ Install these additional components via Stack Builder:
 2. pgAgent - For automated backups
 3. pgBouncer - Connection pooling
 
+### Testing
+
+#### Running Tests
+
+1. **Authentication System Tests**:
+```bash
+# Run all authentication tests
+python manage.py test backend.tests.test_authentication
+
+# Run with verbose output
+python manage.py test backend.tests.test_authentication -v 2
+```
+
+2. **User Model Tests**:
+```bash
+# Run all accounts app tests
+python manage.py test accounts
+
+# Run specific model tests
+python manage.py test accounts.tests.test_models
+
+# Run a specific test class
+python manage.py test accounts.tests.test_models.UserModelTests
+
+# Run a specific test method
+python manage.py test accounts.tests.test_models.UserModelTests.test_create_valid_student
+```
+
+3. **Test Coverage**:
+```bash
+# Run tests with coverage report
+coverage run manage.py test
+coverage report
+
+# Generate HTML coverage report
+coverage html
+# View report in browser at htmlcov/index.html
+```
+
 ### Environment Setup
 1. Create a `.env` file in project root with required settings (see `.env.example`)
 2. Never commit `.env` file to git (always add in .gitignore, if it's already there then don't change it pls)
@@ -95,7 +134,16 @@ python manage.py migrate           # Apply migrations
 
 # Testing
 python manage.py test              # Run all tests
-python manage.py test backend.tests.test_env  # Run specific tests
+python manage.py test backend.tests.test_env  # Run environment tests
+
+# Authentication Tests
+python manage.py test backend.tests.test_authentication  # Run auth flow tests
+python manage.py test accounts.tests.test_models        # Run user model tests
+
+# Run with coverage
+coverage run manage.py test
+coverage report
+coverage html  # Creates HTML report in htmlcov/
 
 # Static Files
 python manage.py collectstatic     # Collect static files
@@ -141,10 +189,10 @@ python manage.py runserver
 - [x] Implement Google OAuth2 integration
 - [x] Set up domain restriction (@inst.hcpss.org)
 - [x] Create login UI with Google Sign-In
-- [ ] Complete backend account verification
-- [ ] Add admin notification system
-- [ ] Set up role-based routing
-- [ ] Add authentication tests
+- [x] Complete backend account verification
+- [x] Add authentication logging system
+- [x] Set up role-based routing
+- [x] Add authentication tests
 
 ### Phase 3: Teacher Features
 - [ ] Session management UI
@@ -265,18 +313,24 @@ For development, we use a shared set of Google OAuth credentials for the team.
 GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-nextauth-secret
+NEXTAUTH_SECRET=your-nextauth-secret  # Generate this using the command below
 ```
 
-2. Get the credentials:
+2. Generate your NEXTAUTH_SECRET:
+```bash
+node -e "console.log(crypto.randomBytes(32).toString('hex'))"
+```
+Copy the output and use it as your NEXTAUTH_SECRET.
+
+3. Get the OAuth credentials:
    - **Team Members**: Message Tiffany for the OAuth credentials
    - These are already set up and working with the HCPSS domain
 
-3. Security Rules:
+4. Security Rules:
    - Keep credentials in `.env.local` only
    - Never commit them to git
    - Don't share outside the team
-   - Each developer uses the same credentials locally
+   - Each developer uses the same OAuth credentials but can have their own NEXTAUTH_SECRET
 
 Alternative: Setting up your own credentials (only if needed):
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
@@ -345,3 +399,43 @@ Alternative: Setting up your own credentials (only if needed):
 - Role-based permission system
 - Session synchronization with frontend
 - Secure token storage in PostgreSQL
+
+
+#### Backend Authentication Monitoring
+
+1. **View Authentication Logs**:
+```bash
+# Monitor auth events in real-time (last 10 entries)
+python manage.py monitor_auth
+
+# Show more historical entries
+python manage.py monitor_auth --tail 50
+
+# View raw log files
+cat logs/auth.log     # All auth events
+cat logs/error.log    # Error events only
+
+# Follow new log entries in real-time
+tail -f logs/auth.log
+```
+
+2. **Search Authentication Events**:
+```bash
+# Find failed login attempts
+grep "WARNING" logs/auth.log
+
+# Search by email
+grep "email@inst.hcpss.org" logs/auth.log
+
+# Search by IP address
+grep "ip_address: 192.168.1.1" logs/auth.log
+```
+
+3. **Log Information Captured**:
+- IP address of login attempt
+- User agent (browser/device info)
+- Timestamp of attempt
+- Email address used
+- Success/failure status
+- User details (if found)
+- Failed attempt counts
