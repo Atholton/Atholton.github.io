@@ -6,6 +6,7 @@ import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
 import { GoogleSignInButton } from "@/components/google-sign-in-button"
+import { useRouter } from "next/router"
 
 export default function TeacherLogin() {
   const { theme, setTheme } = useTheme()
