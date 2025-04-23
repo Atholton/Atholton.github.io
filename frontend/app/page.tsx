@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
+import { GoogleSignInButton } from "@/components/google-sign-in-button"
 
 export default function Home() {
   const { theme, setTheme } = useTheme()
@@ -49,7 +50,18 @@ export default function Home() {
             </Button>
           </Link>
 
-          <Link href="/guest" className="block">
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-gray-300 dark:border-gray-600"></span>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">Or sign in with</span>
+            </div>
+          </div>
+
+          <GoogleSignInButton size="lg" />
+
+          <Link href="/guest" className="block mt-4">
             <Button
               variant="outline"
               className="w-full h-12 border-raider-green dark:border-gray-600 text-raider-green dark:text-gray-200 hover:bg-raider-green/10 dark:hover:bg-gray-700 transition-colors"
