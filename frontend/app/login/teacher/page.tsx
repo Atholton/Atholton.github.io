@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
+import { signIn } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function TeacherLogin() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -49,33 +53,36 @@ export default function TeacherLogin() {
             <h1 className="text-center text-lg font-semibold text-raider-green dark:text-green-400 mb-4 transition-colors">
               ATHOLTON HS RAIDER TIME
             </h1>
-            <form className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium dark:text-gray-200">
-                  Username / HCPSS Login
-                </label>
-                <input
-                  id="username"
-                  type="text"
-                  className="w-full px-3 py-2 border border-raider-gray dark:border-gray-600 rounded-sm focus:outline-none focus:ring-1 focus:ring-raider-green dark:focus:ring-green-500 bg-white dark:bg-gray-700 text-black dark:text-white transition-colors"
+            <div className="space-y-4">
+              <Button
+                onClick={async () => {
+                  try {
+                    setIsLoading(true);
+                    const result = await signIn('google', {
+                      callbackUrl: '/teacher',
+                      redirect: true
+                    });
+                  } catch (error) {
+                    console.error('Login failed:', error);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                disabled={isLoading}
+                className="w-full bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-600 transition-colors flex items-center justify-center gap-2 py-2"
+              >
+                <Image
+                  src="/google.svg"
+                  alt="Google logo"
+                  width={20}
+                  height={20}
                 />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium dark:text-gray-200">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  className="w-full px-3 py-2 border border-raider-gray dark:border-gray-600 rounded-sm focus:outline-none focus:ring-1 focus:ring-raider-green dark:focus:ring-green-500 bg-white dark:bg-gray-700 text-black dark:text-white transition-colors"
-                />
-              </div>
-              <div>
-                <Button className="w-full bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white transition-colors">
-                  Login
-                </Button>
-              </div>
-            </form>
+                {isLoading ? 'Signing in...' : 'Sign in with Google'}
+              </Button>
+              <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+                Use your HCPSS Google account to sign in
+              </p>
+            </div>
           </div>
         </div>
       </div>

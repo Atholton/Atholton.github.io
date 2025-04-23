@@ -10,8 +10,18 @@ interface GoogleSignInButtonProps {
 }
 
 export function GoogleSignInButton({ className, redirectUrl = '/student-home' }: GoogleSignInButtonProps) {
-  const handleClick = () => {
-    signIn('google', { callbackUrl: redirectUrl });
+  const handleClick = async () => {
+    console.log('GoogleSignInButton: Click handler started');
+    try {
+      console.log('GoogleSignInButton: Attempting to sign in with redirectUrl:', redirectUrl);
+      const result = await signIn('google', { 
+        callbackUrl: redirectUrl,
+        redirect: true
+      });
+      console.log('GoogleSignInButton: Sign in result:', result);
+    } catch (error) {
+      console.error('GoogleSignInButton: Failed to sign in:', error);
+    }
   };
 
   return (

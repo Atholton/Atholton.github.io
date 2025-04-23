@@ -56,7 +56,7 @@ export default function StudentLogin() {
           <h1 className="text-2xl font-bold text-foreground">Student Login</h1>
           
           {/* Google Sign-In Button */}
-          <GoogleSignInButton className="w-full" redirectUrl="/student-home" />
+          <GoogleSignInButton className="w-full" redirectUrl="/student" />
           
           <p className="text-sm text-muted-foreground text-center">
             Please sign in with your HCPSS account (@inst.hcpss.org)
