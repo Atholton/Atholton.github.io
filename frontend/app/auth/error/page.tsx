@@ -4,8 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-
-export default function ErrorPage() {
+import { Suspense } from 'react';
+function ErrorPageContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
@@ -51,4 +51,15 @@ export default function ErrorPage() {
       </Card>
     </div>
   );
+}
+
+export default function ErrorPage() {
+
+  return (
+    <Suspense>
+      <ErrorPageContent />
+    </Suspense>
+  )
+
+
 }
