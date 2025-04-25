@@ -2,10 +2,19 @@
 
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { GoogleSignInButton } from "@/components/ui/google-signin-button";
+import { useEffect, useState } from "react";
 
 export default function TestAuth() {
   const { data: session, status } = useSession();
+  const [origin, setOrigin] = useState<string>("");
+  const [currentUrl, setCurrentUrl] = useState<string>("");
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+    setCurrentUrl(window.location.href);
+  }, []);
 
   return (
     <div className="p-8">
@@ -21,43 +30,34 @@ export default function TestAuth() {
           )}
         </div>
 
-        <div className="space-x-4">
-          <Button
-            onClick={() => {
-              console.log("Sign in clicked");
-              signIn("google", {
-                callbackUrl: "/test-auth",
-                redirect: true,
-              });
-            }}
-          >
-            Sign In (Debug)
-          </Button>
-
-          <Button
-            variant="destructive"
-            onClick={() => {
-              console.log("Sign out clicked");
-              signOut({ callbackUrl: "/test-auth" });
-            }}
-          >
-            Sign Out (Debug)
-          </Button>
+        <div className="space-y-4">
+          <div className="space-x-4">
+            <GoogleSignInButton redirectUrl="/test-auth" />
+            <Button
+              variant="destructive"
+              onClick={() => {
+                console.log("Sign out clicked");
+                signOut({ callbackUrl: "/test-auth" });
+              }}
+            >
+              Sign Out (Debug)
+            </Button>
+          </div>
+          <div className="text-sm text-gray-500">
+            <p>Debug Info:</p>
+            <ul className="list-disc pl-4">
+              <li>Status: {status}</li>
+              <li>Session: {session ? "Yes" : "No"}</li>
+              <li>Email: {session?.user?.email || "Not signed in"}</li>
+            </ul>
+          </div>
         </div>
 
         <div className="mt-8">
           <h2 className="text-xl mb-2">Environment Check:</h2>
           <ul className="list-disc pl-4">
-            <li>
-              NEXTAUTH_URL:{" "}
-              {typeof window !== "undefined"
-                ? window.location.origin
-                : "Not available"}
-            </li>
-            <li>
-              Current URL:{" "}
-              {typeof window !== "undefined" ? window.location.href : "Not available"}
-            </li>
+            <li>NEXTAUTH_URL: {origin || "Loading..."}</li>
+            <li>Current URL: {currentUrl || "Loading..."}</li>
           </ul>
         </div>
       </div>

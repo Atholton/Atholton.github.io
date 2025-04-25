@@ -6,7 +6,12 @@ import { getRequestIp } from '@/lib/utils';
 
 // Separate limiters for different endpoints
 const authLimiter = new RateLimiterMemory({
-  points: 5, // Number of points
+  points: 20, // Increased points for auth endpoints
+  duration: 60, // Per 60 seconds
+});
+
+const sessionLimiter = new RateLimiterMemory({
+  points: 60, // Higher limit for session checks
   duration: 60, // Per 60 seconds
 });
 
@@ -24,7 +29,14 @@ export async function rateLimitMiddleware(
 
   try {
     // Choose limiter based on path
-    const limiter = path.startsWith('/api/auth') ? authLimiter : apiLimiter;
+    let limiter;
+    if (path === '/api/auth/session') {
+      limiter = sessionLimiter;
+    } else if (path.startsWith('/api/auth')) {
+      limiter = authLimiter;
+    } else {
+      limiter = apiLimiter;
+    }
     const key = `${ip}:${path}`;
 
     await limiter.consume(key);

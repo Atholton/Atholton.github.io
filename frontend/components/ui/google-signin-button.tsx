@@ -14,11 +14,17 @@ export function GoogleSignInButton({ className, redirectUrl = '/student-home' }:
     console.log('GoogleSignInButton: Click handler started');
     try {
       console.log('GoogleSignInButton: Attempting to sign in with redirectUrl:', redirectUrl);
-      const result = await signIn('google', { 
+      await signIn('google', { 
         callbackUrl: redirectUrl,
-        redirect: true
+        redirect: false
+      }).then((response) => {
+        console.log('GoogleSignInButton: Sign in response:', response);
+        if (response?.error) {
+          console.error('GoogleSignInButton: Auth error:', response.error);
+        } else if (response?.url) {
+          window.location.href = response.url;
+        }
       });
-      console.log('GoogleSignInButton: Sign in result:', result);
     } catch (error) {
       console.error('GoogleSignInButton: Failed to sign in:', error);
     }

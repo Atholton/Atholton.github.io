@@ -1,171 +1,110 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
+import type { NextAuthOptions, Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import type { Account } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { OAuth2Client } from 'google-auth-library';
-import { logger } from '@/lib/logger';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000';
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// Test user roles mapping
+const TEST_USER_ROLES: { [email: string]: 'teacher' | 'student' } = {
+  'Hana_Rhee@hcpss.org': 'teacher', 
+  'tmccormick1104@mgail.com': 'student',
+  'joelihm1@gmail.com': 'student',
+  'tristan.carter66@gmail.com': 'student',
+  'cobi.hayden.17@gmail.com': 'student',
+  'radhik.ampani@gmail.com': 'student',
+  'ecasto6465@gmail.com': 'student',
+  'nathanli484@gmail.com': 'student',
+};
 
-interface BackendResponse {
-  status: string;
-  role: string;
-  name?: string;
+declare module "next-auth" {
+  interface Session {
+    accessToken?: string;
+    idToken?: string;
+    userRole?: 'teacher' | 'student';
+    user: {
+      email?: string | null;
+      name?: string | null;
+    };
+  }
 }
 
-// Debug function to log auth events
-const logAuthEvent = async (event: string, data: any) => {
-  console.log(`NextAuth Event [${event}]:`, data);
-  await logger.info('auth', event, data);
-};
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string;
+    idToken?: string;
+    userRole?: 'teacher' | 'student';
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "select_account",
+          access_type: "online", // Changed to online since we don't need refresh tokens
+          response_type: "code",
+          scope: "openid email profile",
+          // Remove any hosted domain restrictions
+        },
+      },
     }),
   ],
-  callbacks: {
-    async signIn({ account, profile }) {
-      await logAuthEvent('signIn started', { email: profile?.email });
-      if (account?.provider === "google") {
-        try {
-          // 1. Verify Google ID token
-          if (!account.id_token) {
-            await logger.error('auth', 'Missing ID token', new Error('No ID token provided'));
-            return false;
-          }
-
-          try {
-            const ticket = await googleClient.verifyIdToken({
-              idToken: account.id_token,
-              audience: process.env.GOOGLE_CLIENT_ID,
-            });
-            const payload = ticket.getPayload();
-            
-            if (!payload) {
-              await logger.error('auth', 'Invalid ID token', new Error('No payload'));
-              return false;
-            }
-          } catch (error) {
-            await logger.error('auth', 'ID token verification failed', error as Error);
-            return false;
-          }
-
-          // 2. Verify HCPSS domain
-          if (!profile?.email?.endsWith("@inst.hcpss.org")) {
-            await logger.warn('auth', 'Invalid email domain', { email: profile?.email });
-            return false;
-          }
-
-          // 3. Verify user in backend
-          try {
-            const response = await fetch(`${BACKEND_URL}/api/accounts/verify/`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: profile.email }),
-            });
-
-            if (!response.ok) {
-              await logger.warn('auth', 'Backend verification failed', { 
-                email: profile.email,
-                status: response.status 
-              });
-              return false;
-            }
-
-            const backendData = await response.json() as BackendResponse;
-            if (backendData.status === 'success') {
-              
-              if (backendData.role !== 'teacher' && backendData.role !== 'student') {
-                await logger.warn('auth', 'Invalid role from backend', { 
-                  email: profile.email,
-                  role: backendData.role
-                });
-                return '/unauthorized';
-              }
-
-              await logAuthEvent('Authentication successful', { 
-                email: profile.email,
-                role: backendData.role 
-              });
-              return true;
-            }
-            
-            await logger.warn('auth', 'Backend verification denied', { 
-              email: profile.email 
-            });
-            return false;
-          } catch (error) {
-            await logger.error('auth', 'Backend verification error', error as Error, { 
-              email: profile.email 
-            });
-            return false;
-          }
-        } catch (error) {
-          await logger.error('auth', 'Sign-in process error', error as Error);
-          return false;
-        }
-      }
-      
-      await logger.warn('auth', 'Invalid provider', { provider: account?.provider });
-      return false;
-    },
-    async jwt({ token, account, profile }) {
-      // Verify user role on first sign in
-      if (account && profile?.email) {
-        try {
-          const response = await fetch(`${BACKEND_URL}/api/accounts/verify/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ email: profile.email }),
-          });
-
-          if (response.ok) {
-            const data = await response.json() as BackendResponse;
-            if (data.status === 'success' && (data.role === 'teacher' || data.role === 'student')) {
-              token.userRole = data.role;
-              if (data.name) token.name = data.name;
-              
-              await logger.info('auth', 'JWT updated with role', {
-                email: profile.email,
-                role: data.role
-              });
-            } else {
-              await logger.warn('auth', 'Invalid role in JWT callback', {
-                email: profile.email,
-                role: data.role
-              });
-              token.userRole = 'unauthorized';
-            }
-          }
-        } catch (error) {
-          await logger.error('auth', 'Failed to fetch user role', error as Error);
-          token.userRole = 'error';
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Add custom session data
-      if (session.user) {
-        session.user.role = token.userRole;
-      }
-      return session;
-    },
-  },
   pages: {
-    signIn: "/login/teacher", // Default to teacher login
-    error: "/error",
+    signIn: "/login/student",
+    error: "/auth/error",
   },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  callbacks: {
+    async signIn({ user, account }: { user: User, account: Account | null }) {
+      // DEVELOPMENT MODE: Allow any Google account
+      console.warn('DEVELOPMENT MODE: Email domain verification is temporarily disabled');
+      console.log('Signed in user:', user.email);
+
+      // TODO: Re-enable domain verification before production
+      // if (!user.email || (!user.email.endsWith('@inst.hcpss.org') && !user.email.endsWith('@hcpss.org'))) {
+      //   console.warn('Invalid email domain:', user.email);
+      //   return '/auth/error?error=InvalidDomain';
+      // }
+
+      return true;
+    },
+    async redirect({ url, baseUrl }: { url: string, baseUrl: string }) {
+      if (url.startsWith(baseUrl)) return url;
+      if (url.startsWith('/')) return new URL(url, baseUrl).toString();
+      return baseUrl;
+    },
+    async jwt({ token, account, user }: { token: JWT, account: Account | null, user: User }) {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.idToken = account.id_token;
+        
+        // Assign role based on email for test users
+        if (user.email && user.email in TEST_USER_ROLES) {
+          token.userRole = TEST_USER_ROLES[user.email];
+          console.log(`Assigned role ${token.userRole} to ${user.email}`);
+        } else {
+          console.log(`No role assigned for ${user.email}`);
+          token.userRole = 'student'; // Default role
+        }
+      }
+      return token;
+    },
+    async session({ session, token }: { session: Session, token: JWT }): Promise<Session> {
+      if (session.user) {
+        session.accessToken = token.accessToken;
+        session.idToken = token.idToken;
+        session.userRole = token.userRole;
+      }
+      return session;
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);
-
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
