@@ -5,16 +5,33 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
-import { GoogleSignInButton } from "@/components/google-sign-in-button"
+import { GoogleSignInButton } from "@/components/ui/google-signin-button"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 
 export default function StudentLogin() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const { data: session } = useSession()
+  const router = useRouter()
 
-  // Avoid hydration mismatch
+  // Handle session changes and redirects
   useEffect(() => {
+    console.log('Student login - Session changed:', session);
+    if (session?.userRole) {
+      console.log('Student login - User role found:', session.userRole);
+      if (session.userRole === 'teacher') {
+        console.log('Student login - Redirecting to teacher');
+        router.push('/teacher')
+      } else if (session.userRole === 'student') {
+        console.log('Student login - Redirecting to student');
+        router.push('/student')
+      }
+    } else {
+      console.log('Student login - No user role in session');
+    }
     setMounted(true)
-  }, [])
+  }, [session, router])
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")
@@ -22,16 +39,8 @@ export default function StudentLogin() {
 
   return (
     <main className="min-h-screen flex items-center justify-center relative">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/student_log_in_background-qAPrsMHi6ul4JGC5WDQfGWFgzM4UyZ.png"
-          alt="Students at Atholton High School"
-          fill
-          className="object-cover opacity-90"
-          priority
-        />
-      </div>
+      {/* Background Color */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-900 dark:to-gray-800" />
 
       <div className="absolute top-4 right-4 z-20">
         <button
@@ -87,7 +96,7 @@ export default function StudentLogin() {
                   </div>
                 </div>
 
-                <GoogleSignInButton />
+                <GoogleSignInButton/>
               </div>
             </form>
           </div>

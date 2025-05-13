@@ -8,6 +8,7 @@ import { Providers } from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:3000'),
   title: "Atholton High School Raider Time",
   description: "Raider Time management system for Atholton High School",
 }

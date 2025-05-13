@@ -177,3 +177,16 @@ def class_period_detail(request, class_id):
         'available_seats': class_period.capacity - class_period.current_enrollment
     }
     return Response(data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def student_by_email(request, email):
+    """API endpoint for getting student by email"""
+    student = get_object_or_404(Student, hcpss_email=email)
+    announcements = Announcement.objects.filter(teacher=student.teacher)
+    
+    data = {
+        'student': StudentSerializer(student).data,
+        'announcements': AnnouncementSerializer(announcements, many=True).data
+    }
+    return Response(data)

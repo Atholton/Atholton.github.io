@@ -5,19 +5,34 @@ import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
-import { GoogleSignInButton } from "@/components/google-sign-in-button"
-import { useRouter } from "next/router"
+import { GoogleSignInButton } from "@/components/ui/google-signin-button"
+import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 export default function TeacherLogin() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session } = useSession()
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Avoid hydration mismatch
+  // Handle session changes and redirects
   useEffect(() => {
+    console.log('Teacher login - Session changed:', session);
+    if (session?.userRole) {
+      console.log('Teacher login - User role found:', session.userRole);
+      if (session.userRole === 'teacher') {
+        console.log('Teacher login - Redirecting to teacher');
+        router.push('/teacher')
+      } else if (session.userRole === 'student') {
+        console.log('Teacher login - Redirecting to student');
+        router.push('/student')
+      }
+    } else {
+      console.log('Teacher login - No user role in session');
+    }
     setMounted(true)
-  }, [])
+  }, [session, router])
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark")

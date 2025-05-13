@@ -6,8 +6,8 @@ import GoogleProvider from "next-auth/providers/google";
 
 // Test user roles mapping
 const TEST_USER_ROLES: { [email: string]: 'teacher' | 'student' } = {
-  'Hana_Rhee@hcpss.org': 'teacher', 
-  'tmccormick1104@mgail.com': 'student',
+  'hanaohrhee@gmail.com': 'teacher', 
+  'tmccormick1104@gmail.com': 'student',
   'joelihm1@gmail.com': 'student',
   'tristan.carter66@gmail.com': 'student',
   'cobi.hayden.17@gmail.com': 'student',
@@ -33,74 +33,165 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     idToken?: string;
     userRole?: 'teacher' | 'student';
+    email?: string;
+    name?: string;
   }
 }
 
-export const authOptions: NextAuthOptions = {
+console.log('NextAuth: Loading configuration');
+console.log('NextAuth: Client ID:', process.env.GOOGLE_CLIENT_ID);
+console.log('NextAuth: Client Secret length:', process.env.GOOGLE_CLIENT_SECRET?.length);
+
+console.log('NextAuth: Starting configuration');
+if (!process.env.GOOGLE_CLIENT_ID) console.error('NextAuth: Missing GOOGLE_CLIENT_ID');
+if (!process.env.GOOGLE_CLIENT_SECRET) console.error('NextAuth: Missing GOOGLE_CLIENT_SECRET');
+if (!process.env.NEXTAUTH_URL) console.error('NextAuth: Missing NEXTAUTH_URL');
+if (!process.env.NEXTAUTH_SECRET) console.error('NextAuth: Missing NEXTAUTH_SECRET');
+
+const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       authorization: {
         params: {
           prompt: "select_account",
-          access_type: "online", // Changed to online since we don't need refresh tokens
+          access_type: "offline",
           response_type: "code",
-          scope: "openid email profile",
-          // Remove any hosted domain restrictions
+          scope: "openid email profile"
         },
       },
     }),
   ],
   pages: {
-    signIn: "/login/student",
-    error: "/auth/error",
+    signIn: '/login',
+    error: '/auth/error',
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async signIn({ user, account }: { user: User, account: Account | null }) {
-      // DEVELOPMENT MODE: Allow any Google account
-      console.warn('DEVELOPMENT MODE: Email domain verification is temporarily disabled');
-      console.log('Signed in user:', user.email);
+      try {
+        if (!user?.email) {
+          console.error('No email provided');
+          return '/auth/error?error=NoEmail';
+        }
 
-      // TODO: Re-enable domain verification before production
-      // if (!user.email || (!user.email.endsWith('@inst.hcpss.org') && !user.email.endsWith('@hcpss.org'))) {
-      //   console.warn('Invalid email domain:', user.email);
-      //   return '/auth/error?error=InvalidDomain';
-      // }
+        // DEVELOPMENT MODE: Allow any Google account
+        console.log('Attempting sign in for:', user.email);
 
-      return true;
+        // TODO: Re-enable domain verification before production
+        // if (!user.email.endsWith('@inst.hcpss.org') && !user.email.endsWith('@hcpss.org')) {
+        //   console.warn('Invalid email domain:', user.email);
+        //   return '/auth/error?error=InvalidDomain';
+        // }
+
+        if (!account) {
+          console.error('No account data provided');
+          return '/auth/error?error=NoAccount';
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Sign in error:', error);
+        return '/auth/error?error=SignInFailed';
+      }
     },
-    async redirect({ url, baseUrl }: { url: string, baseUrl: string }) {
-      if (url.startsWith(baseUrl)) return url;
-      if (url.startsWith('/')) return new URL(url, baseUrl).toString();
+    async redirect({ url, baseUrl }) {
+      // Always allow error pages to redirect
+      if (url.includes('/auth/error')) {
+        return url;
+      }
+
+      // Allow relative URLs
+      if (url.startsWith('/')) {
+        const fullUrl = `${baseUrl}${url}`;
+        return fullUrl;
+      }
+
+      // Allow URLs on the same origin
+      if (url.startsWith(baseUrl)) {
+        return url;
+      }
+
+      // After successful sign in, let the client handle redirection
+      // based on the session role
+
+      // Default fallback
       return baseUrl;
     },
     async jwt({ token, account, user }: { token: JWT, account: Account | null, user: User }) {
-      if (account) {
+      try {
+        // Keep existing token data if no new sign in
+        if (!account || !user) {
+          return token;
+        }
+
+        // Update token with new sign in data
         token.accessToken = account.access_token;
         token.idToken = account.id_token;
+        token.email = user.email || undefined;
+        token.name = user.name || undefined;
         
-        // Assign role based on email for test users
-        if (user.email && user.email in TEST_USER_ROLES) {
-          token.userRole = TEST_USER_ROLES[user.email];
-          console.log(`Assigned role ${token.userRole} to ${user.email}`);
-        } else {
-          console.log(`No role assigned for ${user.email}`);
-          token.userRole = 'student'; // Default role
+        // Verify token with backend
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/accounts/verify-token/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: account.id_token }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to verify token with backend');
+          }
+
+          const data = await response.json();
+          token.userRole = data.role;
+          token.name = data.name;
+          
+          // Fallback to test users if backend verification fails
+          if (!token.userRole && user.email && user.email in TEST_USER_ROLES) {
+            console.warn('Using test user role fallback for:', user.email);
+            token.userRole = TEST_USER_ROLES[user.email];
+          }
+        } catch (error) {
+          console.error('Backend verification failed:', error);
+          // Fallback to test users
+          if (user.email && user.email in TEST_USER_ROLES) {
+            console.warn('Using test user role fallback for:', user.email);
+            token.userRole = TEST_USER_ROLES[user.email];
+          } else {
+            token.userRole = 'student'; // Default role
+          }
         }
+
+        return token;
+      } catch (error) {
+        console.error('JWT callback error:', error);
+        return token;
       }
-      return token;
     },
     async session({ session, token }: { session: Session, token: JWT }): Promise<Session> {
-      if (session.user) {
-        session.accessToken = token.accessToken;
-        session.idToken = token.idToken;
-        session.userRole = token.userRole;
+      // Add token data to session
+      session.accessToken = token.accessToken;
+      session.idToken = token.idToken;
+      session.userRole = token.userRole;
+
+      // Ensure user object exists
+      if (!session.user) {
+        session.user = {};
       }
+
+      // Add role and email to user object
+      if (session.user) {
+        (session.user as any).userRole = token.userRole;
+        session.user.email = token.email;
+      }
+
       return session;
     },
   },

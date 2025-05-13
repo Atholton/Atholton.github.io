@@ -6,6 +6,7 @@ import { useTheme } from "@/components/theme-provider"
 import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
 import { GoogleSignInButton } from "@/components/google-sign-in-button"
+import { RoleRedirect } from "./components/RoleRedirect"
 
 export default function Home() {
   const { theme, setTheme } = useTheme()
@@ -21,56 +22,59 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted dark:bg-gray-900 transition-colors duration-300">
-      <div className="absolute top-4 right-4">
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-        >
-          {mounted && theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
-        </button>
-      </div>
-
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-md shadow-md p-6 transition-colors duration-300">
-        <h1 className="text-center text-2xl font-bold text-raider-green dark:text-green-400 mb-6 transition-colors">
-          ATHOLTON HS RAIDER TIME
-        </h1>
-
-        <div className="space-y-4">
-          <Link href="/login/student" className="block">
-            <Button className="w-full bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white h-12 transition-colors">
-              Student Login
-            </Button>
-          </Link>
-
-          <Link href="/login/teacher" className="block">
-            <Button className="w-full bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white h-12 transition-colors">
-              Teacher Login
-            </Button>
-          </Link>
-
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300 dark:border-gray-600"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">Or sign in with</span>
-            </div>
-          </div>
-
-          <GoogleSignInButton size="lg" />
-
-          <Link href="/guest" className="block mt-4">
-            <Button
-              variant="outline"
-              className="w-full h-12 border-raider-green dark:border-gray-600 text-raider-green dark:text-gray-200 hover:bg-raider-green/10 dark:hover:bg-gray-700 transition-colors"
-            >
-              Continue as Guest
-            </Button>
-          </Link>
+    <>
+      <RoleRedirect />
+      <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted dark:bg-gray-900 transition-colors duration-300">
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {mounted && theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
+          </button>
         </div>
-      </div>
-    </main>
+
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-md shadow-md p-6 transition-colors duration-300">
+          <h1 className="text-center text-2xl font-bold text-raider-green dark:text-green-400 mb-6 transition-colors">
+            ATHOLTON HS RAIDER TIME
+          </h1>
+
+          <div className="space-y-4">
+            <Link href="/login/student" className="block">
+              <Button className="w-full bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white h-12 transition-colors">
+                Student Login
+              </Button>
+            </Link>
+
+            <Link href="/login/teacher" className="block">
+              <Button className="w-full bg-raider-green hover:bg-raider-lightgreen dark:bg-raider-darkgray dark:hover:bg-gray-700 text-white h-12 transition-colors">
+                Teacher Login
+              </Button>
+            </Link>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-gray-300 dark:border-gray-600"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">Or sign in with</span>
+              </div>
+            </div>
+
+            <GoogleSignInButton size="lg" />
+
+            <Link href="/guest" className="block mt-4">
+              <Button
+                variant="outline"
+                className="w-full h-12 border-raider-green dark:border-gray-600 text-raider-green dark:text-gray-200 hover:bg-raider-green/10 dark:hover:bg-gray-700 transition-colors"
+              >
+                Continue as Guest
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </main>
+    </>
   )
 }

@@ -8,25 +8,44 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { getStudent, getAnnouncements, type Student, type Announcement } from "@/lib/api/student"
 import { format } from "date-fns"
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 
 export default function StudentDashboard() {
+  const { data: session, status } = useSession();
   const [student, setStudent] = useState<Student | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      redirect('/login');
+    }
+  }, [status]);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadData() {
       try {
+        // Wait for session to be loaded
+        if (status === 'loading') {
+          return;
+        }
+
+        // Get email from session.user.email
+        const userEmail = session?.user?.email;
+        if (!userEmail) {
+          throw new Error('No user email found');
+        }
+
         setLoading(true);
         setError(null);
 
-        // TODO: Get actual student ID from auth context
-        const studentId = 1;
         const [studentData, announcementsData] = await Promise.all([
-          getStudent(studentId),
+          getStudent(userEmail),
           getAnnouncements(1)
         ]);
 
@@ -50,7 +69,7 @@ export default function StudentDashboard() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [session, status]);
 
   if (loading) {
     return (

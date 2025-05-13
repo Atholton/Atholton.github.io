@@ -65,17 +65,34 @@ export async function getStudents(params: {
   return response.json() as Promise<PaginatedResponse<Student>>;
 }
 
-export async function getStudent(id: number) {
-  const response = await fetchWithAuth(`${API_BASE}/students/${id}/`);
-  if (!response.ok) throw new Error('Failed to fetch student');
-  return response.json() as Promise<{
-    student: Student;
-    announcements: Announcement[];
-  }>;
+export async function getStudent(email: string) {
+  try {
+    const response = await fetchWithAuth(`${API_BASE}/students/by-email/${encodeURIComponent(email)}/`);
+    if (!response.ok) {
+      console.error(`Failed to fetch student: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return {
+      student: data,
+      announcements: [] // We'll fetch announcements separately
+    };
+  } catch (error) {
+    console.error('Error in getStudent:', error);
+    throw error;
+  }
 }
 
 export async function getAnnouncements(page = 1) {
-  const response = await fetchWithAuth(`${API_BASE}/announcements/?page=${page}`);
-  if (!response.ok) throw new Error('Failed to fetch announcements');
-  return response.json() as Promise<PaginatedResponse<Announcement>>;
+  try {
+    const response = await fetchWithAuth(`${API_BASE}/announcements/?page=${page}`);
+    if (!response.ok) {
+      console.error(`Failed to fetch announcements: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json() as Promise<PaginatedResponse<Announcement>>;
+  } catch (error) {
+    console.error('Error in getAnnouncements:', error);
+    throw error;
+  }
 }
